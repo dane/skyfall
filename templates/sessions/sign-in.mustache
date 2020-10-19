@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <title>Sign-In</title>
+    <style>
+      .container {
+        width: 25%;
+        margin: 0 auto;
+      }
+
+      .error {
+        border: 1px solid #911; 
+        background: #FEE;
+        padding: 10px 20px;
+      }
+
+      form {
+        border: 1px solid #CCC;
+        padding: 20px;
+        background: #EEE;
+      }
+
+      label {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {{#error}}
+      <p class="error">{{error}}</p>
+      {{/error}}
+      <form method="post" action="{{signInPath}}">
+        <div>
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username">
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password">
+        </div>
+        <div>
+          <button>Sign-In</button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
