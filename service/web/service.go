@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/gorilla/csrf"
 	"go.uber.org/zap"
 
 	"github.com/dane/skyfall/jwt"
@@ -17,6 +18,9 @@ const (
 	signInPath = "/sign-in"
 
 	cookieUserSession = "_session"
+	cookeNameCSRF     = "_csrf"
+
+	fieldNameCSRF = "_csrf"
 )
 
 type Service interface {
@@ -56,6 +60,10 @@ func New(cfg *Config, options ...Option) (http.Handler, error) {
 
 	r := chi.NewRouter()
 	r.Use(s.extractUserSession)
+	r.Use(setCSRF(cfg.CookieSecret))
+	// TODO: setUserSession
+	//   May need to create a custom ResponseWriter that generates the cookie
+	//   when Write is called.
 	r.Method(http.MethodGet, signInPath, s.getSignInHandler)
 	r.Method(http.MethodPost, signInPath, s.postSignInHandler)
 
@@ -73,6 +81,7 @@ func (s *service) Logger() *zap.Logger {
 func (s *service) Data(r *http.Request) Data {
 	data := make(Data)
 	data["signInPath"] = signInPath
+	data["csrfField"] = string(csrf.TemplateField(r))
 
 	return data
 }
@@ -123,5 +132,14 @@ func validateService(s *service) error {
 		validation.Field(&s.postSignInHandler, validation.Required),
 		validation.Field(&s.logger, validation.Required),
 		validation.Field(&s.render, validation.Required),
+	)
+}
+
+func setCSRF(cookieSecret string) func(http.Handler) http.Handler {
+	return csrf.Protect([]byte(cookieSecret),
+		csrf.CookieName(cookeNameCSRF),
+		csrf.FieldName(fieldNameCSRF),
+		csrf.Secure(true),
+		csrf.SameSite(csrf.SameSiteStrictMode),
 	)
 }
