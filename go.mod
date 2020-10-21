@@ -3,6 +3,7 @@ module github.com/dane/skyfall
 go 1.15
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496
 	github.com/cbroglie/mustache v1.2.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-ozzo/ozzo-validation/v4 v4.2.2
