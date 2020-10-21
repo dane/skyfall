@@ -20,7 +20,9 @@ const (
 	cookieUserSession = "_session"
 	cookeNameCSRF     = "_csrf"
 
-	fieldNameCSRF = "_csrf"
+	fieldNameCSRF     = "_csrf"
+	fieldNameUsername = "username"
+	fieldNamePassword = "password"
 )
 
 type Service interface {

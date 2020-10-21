@@ -33,11 +33,11 @@
       <form method="post" action="{{signInPath}}">
         <div>
           <label for="username">Username</label>
-          <input type="text" name="username" id="username">
+          <input type="text" name="{{usernameFieldName}}" id="username">
         </div>
         <div>
           <label for="password">Password</label>
-          <input type="password" name="password" id="password">
+          <input type="password" name="{{passwordFieldName}}" id="password">
           {{{csrfField}}}
         </div>
         <div>

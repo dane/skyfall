@@ -22,6 +22,9 @@ func TestGetSignIn(t *testing.T) {
 	}
 
 	data := s.Data(r)
+	data["usernameFieldName"] = fieldNameUsername
+	data["passwordFieldName"] = fieldNamePassword
+
 	if !cmp.Equal(mr.Data, data) {
 		t.Error(cmp.Diff(mr.Data, data))
 	}
