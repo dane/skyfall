@@ -29,6 +29,7 @@ type Service interface {
 	Render(w http.ResponseWriter, name string, data Data) error
 	Logger() *zap.Logger
 	Data(r *http.Request) Data
+	SetError(http.ResponseWriter, error)
 }
 
 type Data map[string]string
@@ -88,6 +89,19 @@ func (s *service) Data(r *http.Request) Data {
 	return data
 }
 
+func (s *service) SetError(w http.ResponseWriter, err error) {
+	// NOTE: consider replacing setting cookies on a response writer, if possible
+	jar, ok := w.(Contexter)
+	if !ok {
+		// ...
+	}
+
+	cookie := jar.Get(cookieUserSession)
+	// ...
+	jar.Set(cookieUserSession, cookie)
+	// when w.Write() is called, write cookies
+}
+
 func (s *service) extractUserSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie(cookieUserSession)
@@ -144,4 +158,8 @@ func setCSRF(cookieSecret string) func(http.Handler) http.Handler {
 		csrf.Secure(true),
 		csrf.SameSite(csrf.SameSiteStrictMode),
 	)
+}
+
+func setResponseWriter(next http.Handler) http.Handler {
+	return
 }
