@@ -9,16 +9,16 @@ extensible.
 
 ## Background
 
-Authentication (authn) and authorization (authz) are problems nearly every product
+Authentication (AuthN) and authorization (AuthZ) are problems nearly every product
 has to address at some point. Standards exist in this space, OAuth 2.0, JSON Web
 Tokens (JWT), and multi-factor authentication (MFA) for example, but there is
 little code reuse between products and no reuse across languages. Best practices,
 such has password hashing algorithms, evolve every few years and migration
-strategries are necessary to keep user data secure. Building custom authn and
-authz solutions steals the focus from the actual product or problem at hand.
+strategries are necessary to keep user data secure. Building custom AuthN and
+AuthZ solutions steals the focus from the actual product or problem at hand.
 
 There are third parties, such as Okta, Auth0, and Google, that will provide
-authn and authz solutions, but engineering efforts are still allocated to
+AuthN and AuthZ solutions, but engineering efforts are still allocated to
 integrate with them.  
 
 ## Terminology
@@ -31,8 +31,8 @@ integrate with them.
   or SMS to send additional authentication codes.
 - OAuth 2.0 - A standard for authorizing a service to interact with another
   service. Vist https://oauth.net/2/ for a complete description.
-- Authn - Shorthand for authentication.
-- Authz - Shorthand for authorization.
+- AuthN - Shorthand for authentication.
+- AuthZ - Shorthand for authorization.
 
 ## Proposal
 
@@ -55,6 +55,7 @@ support langauges that may prefer JSON over gRPC.
 - UndeleteUser - Restore a user from a deleted state
 - SuspendUser - Suspend a user
 - UnsuspendUser - Restore a user from a suspended state
+- VerifyUser - Verify a user
 
 #### OAuth 2.0 Client Actions
 
@@ -65,7 +66,7 @@ support langauges that may prefer JSON over gRPC.
 - SuspendOAuthClient - Suspend an OAuth 2.0 client
 - UnsuspendOAuthClient - Restore an OAuth 2.0 client from a suspended state
 
-#### Authn/Authz Actions
+#### AuthN/AuthZ Actions
 
 - Authenticate - Authenticate a user
 - CreateAuthorizationGrant - Create an authorization grant for an OAuth 2.0
@@ -96,3 +97,6 @@ To support the OAuth 2.0 contract the following endpoint(s) must be present:
   user sign-up page, should be handled by the operators of Skyfall. The user
   model is designed to hold arbitrary data so it is left to the operator on what
   should be provided during creation. 
+- Password resetting - Being able to reset a password requires more thought. It
+  is essential to an authentication service, but it will be introduced after in
+  the near future.
