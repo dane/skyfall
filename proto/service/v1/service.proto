@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package service.v1;
+
+option go_package = "github.com/dane/skyfall/proto/service/v1;v1";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+
+service APIService {
+  rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
+  rpc UpdateAccount (UpdateAccountRequest) returns (UpdateAccountResponse);
+  rpc DeleteAccount (DeleteAccountRequest) returns (DeleteAccountResponse);
+  rpc UndeleteAccount (UndeleteAccountRequest) returns (UndeleteAccountResponse);
+  rpc VerifyAccount (VerifyAccountRequest) returns (VerifyAccountResponse);
+  rpc SuspendAccount (SuspendAccountRequest) returns (SuspendAccountResponse);
+  rpc UnsuspendAccount (UnsuspendAccountRequest) returns (UnsuspendAccountResponse);
+  rpc GetAccount (GetAccountRequest) returns (GetAccountResponse);
+  rpc GetAccountByName (GetAccountByNameRequest) returns (GetAccountByNameResponse);
+}
+
+message CreateAccountRequest {
+  string name = 1;
+  string password = 2;
+  string password_confirmation = 3;
+  google.protobuf.Struct properties = 4;
+}
+
+message CreateAccountResponse {
+  Account account = 1;
+}
+
+message UpdateAccountRequest {
+  Account account = 1;
+  google.protobuf.FieldMask fields = 2;
+}
+
+message UpdateAccountResponse {
+  Account account = 1;
+}
+
+message DeleteAccountRequest {
+  string id = 1;
+}
+
+message DeleteAccountResponse {}
+
+message UndeleteAccountRequest {
+  string id = 1;
+}
+
+message UndeleteAccountResponse {
+  Account account = 1;
+}
+
+message VerifyAccountRequest {
+  string id = 1;
+}
+
+message VerifyAccountResponse {
+  Account account = 1;
+}
+
+message SuspendAccountRequest {
+  string id = 1;
+}
+
+message SuspendAccountResponse {
+  Account account = 1;
+}
+
+message UnsuspendAccountRequest {
+  string id = 1;
+}
+
+message UnsuspendAccountResponse {
+  Account account = 1;
+}
+
+message GetAccountRequest {
+  string id = 1;
+}
+
+message GetAccountResponse {
+  Account account = 1;
+}
+
+
+message GetAccountByNameRequest {
+  string name = 1;
+}
+
+message GetAccountByNameResponse {
+  Account account = 1;
+}
+
+message Account {
+  string name = 1;
+  string password = 2;
+  string password_confirmation = 3;
+  google.protobuf.Struct properties = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp verified_at = 7;
+  google.protobuf.Timestamp suspended_at = 8;
+}
