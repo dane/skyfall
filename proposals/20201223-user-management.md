@@ -54,14 +54,15 @@ message CreateUserResponse {
 }
 
 message User {
-  string username = 1;
-  string password = 2;
-  string password_confirmation = 3;
-  google.protobuf.Struct properties = 4;
-  google.protobuf.Timestamp created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
-  google.protobuf.Timestamp verified_at = 7;
-  google.protobuf.Timestamp suspended_at = 8;
+  string id = 1;
+  string username = 2;
+  string password = 3;
+  string password_confirmation = 4;
+  google.protobuf.Struct properties = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+  google.protobuf.Timestamp verified_at = 8;
+  google.protobuf.Timestamp suspended_at = 9;
 }
 ```
 
@@ -83,13 +84,55 @@ message UpdateUserResponse {
 }
 ```
 
-### Delete User
+### DeleteUser
 
-### Verify User
+The delete operation is a "soft delete" to later support undeleting a user. The
+`DeleteUserResponse` is empty, but intentionally not `google.protobuf.Empty` in
+case data needs to be returned in the future.
 
-### Suspend User
+```
+message DeleteUserRequest {
+  string id = 1;
+}
 
+message DeleteUserResponse {}
+```
 
+### VerifyUser
+
+The verify operation is meant to support scanerios where a service requires a user
+to verify their account before being able to user said service. All operations
+described in this proposal will be allowed for unverified accounts.
+
+```
+message VerifyUserRequest {
+  string id = 1;
+}
+
+message VerifyUserResponse {
+  User user = 1;
+}
+```
+
+### SuspendUser
+
+Suspending an account renders the account unusable. This differs from the delete
+operation because this does not free the account name.
+
+```
+message SuspendUserRequest {
+  string id = 1;
+}
+
+message SuspendUserResponse {
+  User user = 1;
+}
+```
+
+### GetUser and GetUserByUsername
+
+To align with many operations that target an account by ID, the `GetUser`
+operation accepts an ID string. In some cases only a 
 
 ## Out of Scope
 
