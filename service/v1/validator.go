@@ -20,6 +20,7 @@ var (
 
 type Validator interface {
 	CreateAccount(*pb.CreateAccountRequest) error
+	UpdateAccount(*pb.UpdateAccountRequest) error
 }
 
 type validator struct{}
@@ -31,11 +32,7 @@ func NewValidator() Validator {
 func (v validator) CreateAccount(req *pb.CreateAccountRequest) error {
 	return wrap(codes.InvalidArgument,
 		validation.ValidateStruct(req,
-			validation.Field(&req.Name,
-				validation.Required,
-				validation.Length(3, 20),
-				validation.Match(rxName),
-			),
+			validation.Field(&req.Name, nameRules()...),
 			validation.Field(&req.Password,
 				validation.Required,
 				validation.Length(8, 100),
@@ -49,12 +46,28 @@ func (v validator) CreateAccount(req *pb.CreateAccountRequest) error {
 	)
 }
 
+func (v validator) UpdateAccount(req *pb.UpdateAccountRequest) error {
+	return wrap(codes.InvalidArgument,
+		validation.ValidateStruct(req,
+			validation.Field(&req.Name, validation.When(req.Name != "", nameRules()...)),
+		),
+	)
+}
+
 func wrap(code codes.Code, err error) error {
 	if err != nil {
 		return status.Error(code, err.Error())
 	}
 
 	return nil
+}
+
+func nameRules() []validation.Rule {
+	return []validation.Rule{
+		validation.Required,
+		validation.Length(3, 20),
+		validation.Match(rxName),
+	}
 }
 
 func passwordRequirements(password string) bool {

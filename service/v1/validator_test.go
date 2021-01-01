@@ -6,6 +6,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	pb "github.com/dane/skyfall/proto/gen/go/service/v1"
 	"github.com/dane/skyfall/service/v1"
@@ -145,6 +146,108 @@ func TestCreateAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.CreateAccount(req)
+			if err == nil {
+				if tc.valid {
+					return
+				}
+				t.Fatal("error was expected")
+			} else {
+				st := status.Convert(err)
+				if got, want := st.Code(), codes.InvalidArgument; got != want {
+					t.Errorf("got code %q; want %q", got, want)
+				}
+
+				if got := st.Message(); got != tc.message {
+					t.Errorf("got message %q; want %q", got, tc.message)
+				}
+			}
+		})
+	}
+}
+
+func TestUpdateAccount(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*pb.UpdateAccountRequest)
+		valid   bool
+		message string
+	}{
+		{
+			name: "name can be blank",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Name = ""
+			},
+			valid: true,
+		},
+		{
+			name: "properties can be blank",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Properties = nil
+			},
+			valid: true,
+		},
+		{
+			name: "name and properties can be blank",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Name = ""
+				req.Properties = nil
+			},
+			valid: true,
+		},
+		{
+			name:   "valid",
+			modify: func(*pb.UpdateAccountRequest) {},
+			valid:  true,
+		},
+		{
+			name: "name is too short",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Name = testutil.NewString(t, 2)
+			},
+			message: "name: the length must be between 3 and 20.",
+		},
+		{
+			name: "name is too long",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Name = testutil.NewString(t, 21)
+			},
+			message: "name: the length must be between 3 and 20.",
+		},
+		{
+			name: "name cannot contain special characters",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Name = testutil.NewString(t, 10) + "!"
+			},
+			message: "name: must be in a valid format.",
+		},
+		{
+			name: "name cannot contain dashes",
+			modify: func(req *pb.UpdateAccountRequest) {
+				req.Name = "example-name"
+			},
+			message: "name: must be in a valid format.",
+		},
+	}
+
+	validator := v1.NewValidator()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			properties, err := structpb.NewStruct(map[string]interface{}{
+				"example-key": "example-value",
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req := &pb.UpdateAccountRequest{
+				Name:       "example",
+				Properties: properties,
+			}
+
+			// Apply modififications to the Update request.
+			tc.modify(req)
+
+			err = validator.UpdateAccount(req)
 			if err == nil {
 				if tc.valid {
 					return
