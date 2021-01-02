@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -248,6 +249,71 @@ func TestUpdateAccount(t *testing.T) {
 			tc.modify(req)
 
 			err = validator.UpdateAccount(req)
+			if err == nil {
+				if tc.valid {
+					return
+				}
+				t.Fatal("error was expected")
+			} else {
+				st := status.Convert(err)
+				if got, want := st.Code(), codes.InvalidArgument; got != want {
+					t.Errorf("got code %q; want %q", got, want)
+				}
+
+				if got := st.Message(); got != tc.message {
+					t.Errorf("got message %q; want %q", got, tc.message)
+				}
+			}
+		})
+	}
+}
+
+func TestDeleteAccount(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*pb.DeleteAccountRequest)
+		valid   bool
+		message string
+	}{
+		{
+			name: "id cannot be blank",
+			modify: func(req *pb.DeleteAccountRequest) {
+				req.Id = ""
+			},
+			message: "id: cannot be blank.",
+		},
+		{
+			name: "id cannot be numeric",
+			modify: func(req *pb.DeleteAccountRequest) {
+				req.Id = "123"
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name: "id cannot be alpha",
+			modify: func(req *pb.DeleteAccountRequest) {
+				req.Id = testutil.NewString(t, 10)
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name:   "valid",
+			modify: func(*pb.DeleteAccountRequest) {},
+			valid:  true,
+		},
+	}
+
+	validator := v1.NewValidator()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &pb.DeleteAccountRequest{
+				Id: uuid.New().String(),
+			}
+
+			// Apply modififications to the Delete request.
+			tc.modify(req)
+
+			err := validator.DeleteAccount(req)
 			if err == nil {
 				if tc.valid {
 					return

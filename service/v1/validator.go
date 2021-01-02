@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -21,6 +22,7 @@ var (
 type Validator interface {
 	CreateAccount(*pb.CreateAccountRequest) error
 	UpdateAccount(*pb.UpdateAccountRequest) error
+	DeleteAccount(*pb.DeleteAccountRequest) error
 }
 
 type validator struct{}
@@ -54,12 +56,27 @@ func (v validator) UpdateAccount(req *pb.UpdateAccountRequest) error {
 	)
 }
 
+func (v validator) DeleteAccount(req *pb.DeleteAccountRequest) error {
+	return wrap(codes.InvalidArgument,
+		validation.ValidateStruct(req,
+			validation.Field(&req.Id, idRules()...),
+		),
+	)
+}
+
 func wrap(code codes.Code, err error) error {
 	if err != nil {
 		return status.Error(code, err.Error())
 	}
 
 	return nil
+}
+
+func idRules() []validation.Rule {
+	return []validation.Rule{
+		validation.Required,
+		is.UUID,
+	}
 }
 
 func nameRules() []validation.Rule {
