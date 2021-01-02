@@ -24,6 +24,7 @@ type Validator interface {
 	UpdateAccount(*pb.UpdateAccountRequest) error
 	DeleteAccount(*pb.DeleteAccountRequest) error
 	VerifyAccount(*pb.VerifyAccountRequest) error
+	SuspendAccount(*pb.SuspendAccountRequest) error
 }
 
 type validator struct{}
@@ -66,6 +67,14 @@ func (v validator) DeleteAccount(req *pb.DeleteAccountRequest) error {
 }
 
 func (v validator) VerifyAccount(req *pb.VerifyAccountRequest) error {
+	return wrap(codes.InvalidArgument,
+		validation.ValidateStruct(req,
+			validation.Field(&req.Id, idRules()...),
+		),
+	)
+}
+
+func (v validator) SuspendAccount(req *pb.SuspendAccountRequest) error {
 	return wrap(codes.InvalidArgument,
 		validation.ValidateStruct(req,
 			validation.Field(&req.Id, idRules()...),
