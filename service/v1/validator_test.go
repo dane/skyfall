@@ -462,3 +462,133 @@ func TestSuspendAccount(t *testing.T) {
 		})
 	}
 }
+
+func TestUndeleteAccount(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*pb.UndeleteAccountRequest)
+		valid   bool
+		message string
+	}{
+		{
+			name: "id cannot be blank",
+			modify: func(req *pb.UndeleteAccountRequest) {
+				req.Id = ""
+			},
+			message: "id: cannot be blank.",
+		},
+		{
+			name: "id cannot be numeric",
+			modify: func(req *pb.UndeleteAccountRequest) {
+				req.Id = "123"
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name: "id cannot be alpha",
+			modify: func(req *pb.UndeleteAccountRequest) {
+				req.Id = testutil.NewString(t, 10)
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name:   "valid",
+			modify: func(*pb.UndeleteAccountRequest) {},
+			valid:  true,
+		},
+	}
+
+	validator := v1.NewValidator()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &pb.UndeleteAccountRequest{
+				Id: uuid.New().String(),
+			}
+
+			// Apply modififications to the Undelete request.
+			tc.modify(req)
+
+			err := validator.UndeleteAccount(req)
+			if err == nil {
+				if tc.valid {
+					return
+				}
+				t.Fatal("error was expected")
+			} else {
+				st := status.Convert(err)
+				if got, want := st.Code(), codes.InvalidArgument; got != want {
+					t.Errorf("got code %q; want %q", got, want)
+				}
+
+				if got := st.Message(); got != tc.message {
+					t.Errorf("got message %q; want %q", got, tc.message)
+				}
+			}
+		})
+	}
+}
+
+func TestUnsuspendAccount(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*pb.UnsuspendAccountRequest)
+		valid   bool
+		message string
+	}{
+		{
+			name: "id cannot be blank",
+			modify: func(req *pb.UnsuspendAccountRequest) {
+				req.Id = ""
+			},
+			message: "id: cannot be blank.",
+		},
+		{
+			name: "id cannot be numeric",
+			modify: func(req *pb.UnsuspendAccountRequest) {
+				req.Id = "123"
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name: "id cannot be alpha",
+			modify: func(req *pb.UnsuspendAccountRequest) {
+				req.Id = testutil.NewString(t, 10)
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name:   "valid",
+			modify: func(*pb.UnsuspendAccountRequest) {},
+			valid:  true,
+		},
+	}
+
+	validator := v1.NewValidator()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &pb.UnsuspendAccountRequest{
+				Id: uuid.New().String(),
+			}
+
+			// Apply modififications to the Unsuspend request.
+			tc.modify(req)
+
+			err := validator.UnsuspendAccount(req)
+			if err == nil {
+				if tc.valid {
+					return
+				}
+				t.Fatal("error was expected")
+			} else {
+				st := status.Convert(err)
+				if got, want := st.Code(), codes.InvalidArgument; got != want {
+					t.Errorf("got code %q; want %q", got, want)
+				}
+
+				if got := st.Message(); got != tc.message {
+					t.Errorf("got message %q; want %q", got, tc.message)
+				}
+			}
+		})
+	}
+}
