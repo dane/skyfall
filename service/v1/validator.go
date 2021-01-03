@@ -27,6 +27,8 @@ type Validator interface {
 	SuspendAccount(*pb.SuspendAccountRequest) error
 	UndeleteAccount(*pb.UndeleteAccountRequest) error
 	UnsuspendAccount(*pb.UnsuspendAccountRequest) error
+	GetAccount(*pb.GetAccountRequest) error
+	GetAccountByName(*pb.GetAccountByNameRequest) error
 }
 
 type validator struct{}
@@ -96,6 +98,22 @@ func (v validator) UnsuspendAccount(req *pb.UnsuspendAccountRequest) error {
 	return wrap(codes.InvalidArgument,
 		validation.ValidateStruct(req,
 			validation.Field(&req.Id, idRules()...),
+		),
+	)
+}
+
+func (v validator) GetAccount(req *pb.GetAccountRequest) error {
+	return wrap(codes.InvalidArgument,
+		validation.ValidateStruct(req,
+			validation.Field(&req.Id, idRules()...),
+		),
+	)
+}
+
+func (v validator) GetAccountByName(req *pb.GetAccountByNameRequest) error {
+	return wrap(codes.InvalidArgument,
+		validation.ValidateStruct(req,
+			validation.Field(&req.Name, nameRules()...),
 		),
 	)
 }

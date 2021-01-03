@@ -147,21 +147,7 @@ func TestCreateAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.CreateAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
 	}
 }
@@ -249,21 +235,7 @@ func TestUpdateAccount(t *testing.T) {
 			tc.modify(req)
 
 			err = validator.UpdateAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
 	}
 }
@@ -314,21 +286,7 @@ func TestDeleteAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.DeleteAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
 	}
 }
@@ -379,21 +337,7 @@ func TestVerifyAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.VerifyAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
 	}
 }
@@ -444,21 +388,7 @@ func TestSuspendAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.SuspendAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
 	}
 }
@@ -509,21 +439,7 @@ func TestUndeleteAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.UndeleteAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
 	}
 }
@@ -574,21 +490,142 @@ func TestUnsuspendAccount(t *testing.T) {
 			tc.modify(req)
 
 			err := validator.UnsuspendAccount(req)
-			if err == nil {
-				if tc.valid {
-					return
-				}
-				t.Fatal("error was expected")
-			} else {
-				st := status.Convert(err)
-				if got, want := st.Code(), codes.InvalidArgument; got != want {
-					t.Errorf("got code %q; want %q", got, want)
-				}
-
-				if got := st.Message(); got != tc.message {
-					t.Errorf("got message %q; want %q", got, tc.message)
-				}
-			}
+			testValidationError(t, tc.valid, tc.message, err)
 		})
+	}
+}
+
+func TestGetAccount(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*pb.GetAccountRequest)
+		valid   bool
+		message string
+	}{
+		{
+			name: "id cannot be blank",
+			modify: func(req *pb.GetAccountRequest) {
+				req.Id = ""
+			},
+			message: "id: cannot be blank.",
+		},
+		{
+			name: "id cannot be numeric",
+			modify: func(req *pb.GetAccountRequest) {
+				req.Id = "123"
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name: "id cannot be alpha",
+			modify: func(req *pb.GetAccountRequest) {
+				req.Id = testutil.NewString(t, 10)
+			},
+			message: "id: must be a valid UUID.",
+		},
+		{
+			name:   "valid",
+			modify: func(*pb.GetAccountRequest) {},
+			valid:  true,
+		},
+	}
+
+	validator := v1.NewValidator()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &pb.GetAccountRequest{
+				Id: uuid.New().String(),
+			}
+
+			// Apply modififications to the Get request.
+			tc.modify(req)
+
+			err := validator.GetAccount(req)
+			testValidationError(t, tc.valid, tc.message, err)
+		})
+	}
+}
+
+func TestGetAccountByName(t *testing.T) {
+	tests := []struct {
+		name    string
+		modify  func(*pb.GetAccountByNameRequest)
+		valid   bool
+		message string
+	}{
+		{
+			name:   "valid",
+			modify: func(*pb.GetAccountByNameRequest) {},
+			valid:  true,
+		},
+		{
+			name: "missing name",
+			modify: func(req *pb.GetAccountByNameRequest) {
+				req.Name = ""
+			},
+			message: "name: cannot be blank.",
+		},
+		{
+			name: "name is too short",
+			modify: func(req *pb.GetAccountByNameRequest) {
+				req.Name = testutil.NewString(t, 2)
+			},
+			message: "name: the length must be between 3 and 20.",
+		},
+		{
+			name: "name is too long",
+			modify: func(req *pb.GetAccountByNameRequest) {
+				req.Name = testutil.NewString(t, 21)
+			},
+			message: "name: the length must be between 3 and 20.",
+		},
+		{
+			name: "name cannot contain special characters",
+			modify: func(req *pb.GetAccountByNameRequest) {
+				req.Name = testutil.NewString(t, 10) + "!"
+			},
+			message: "name: must be in a valid format.",
+		},
+		{
+			name: "name cannot contain dashes",
+			modify: func(req *pb.GetAccountByNameRequest) {
+				req.Name = "example-name"
+			},
+			message: "name: must be in a valid format.",
+		},
+	}
+
+	validator := v1.NewValidator()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := &pb.GetAccountByNameRequest{
+				Name: "example",
+			}
+
+			// Apply modififications to the create request.
+			tc.modify(req)
+
+			err := validator.GetAccountByName(req)
+			testValidationError(t, tc.valid, tc.message, err)
+		})
+	}
+}
+
+func testValidationError(t *testing.T, valid bool, message string, err error) {
+	t.Helper()
+	if err == nil {
+		if valid {
+			return
+		}
+		t.Fatal("error was expected")
+	} else {
+		st := status.Convert(err)
+		if got, want := st.Code(), codes.InvalidArgument; got != want {
+			t.Errorf("got code %q; want %q", got, want)
+		}
+
+		if got := st.Message(); got != message {
+			t.Errorf("got message %q; want %q", got, message)
+		}
 	}
 }
