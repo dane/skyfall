@@ -32,8 +32,8 @@ message CreateAccountResponse {
 }
 
 message UpdateAccountRequest {
-  Account account = 1;
-  google.protobuf.FieldMask fields = 2;
+  string name = 1;
+  google.protobuf.Struct properties = 2;
 }
 
 message UpdateAccountResponse {

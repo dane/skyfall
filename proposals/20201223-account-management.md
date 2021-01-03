@@ -64,15 +64,13 @@ message Account {
 
 ### UpdateAccount
 
-The update operation will accept a field mask to allow single field
-modifications. If the field mask is omitted, all fields will be assumed.
-Timestamps (eg: `created_at` and `verified_at`) cannot be altered via the
-update operation.
+The update operation will accept name and properties fields. Both fields are
+optional, but partial updates to properties are not supported. 
 
 ```
 message UpdateAccountRequest {
-  Account account = 1;
-  google.protobuf.FieldMask fields = 2;
+  string name = 1;
+  google.protobuf.Struct properties = 2;
 }
 
 message UpdateAccountResponse {
