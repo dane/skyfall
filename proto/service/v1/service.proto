@@ -6,7 +6,6 @@ option go_package = "github.com/dane/skyfall/proto/service/v1;v1";
 
 import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/field_mask.proto";
 
 service APIService {
   rpc CreateAccount (CreateAccountRequest) returns (CreateAccountResponse);
@@ -86,7 +85,6 @@ message GetAccountResponse {
   Account account = 1;
 }
 
-
 message GetAccountByNameRequest {
   string name = 1;
 }
@@ -96,12 +94,11 @@ message GetAccountByNameResponse {
 }
 
 message Account {
-  string name = 1;
-  string password = 2;
-  string password_confirmation = 3;
-  google.protobuf.Struct properties = 4;
-  google.protobuf.Timestamp created_at = 5;
-  google.protobuf.Timestamp updated_at = 6;
-  google.protobuf.Timestamp verified_at = 7;
-  google.protobuf.Timestamp suspended_at = 8;
+  string id = 1;
+  string name = 2;
+  google.protobuf.Struct properties = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+  google.protobuf.Timestamp verified_at = 6;
+  google.protobuf.Timestamp suspended_at = 7;
 }
