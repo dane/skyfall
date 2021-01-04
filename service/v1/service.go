@@ -3,6 +3,8 @@ package v1
 import (
 	"context"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+
 	pb "github.com/dane/skyfall/proto/gen/go/service/v1"
 )
 
@@ -15,6 +17,14 @@ func New(options ...Option) (pb.APIServiceServer, error) {
 	svc := &service{}
 	for _, opt := range options {
 		opt.apply(svc)
+	}
+
+	err := validation.ValidateStruct(svc,
+		validation.Field(&svc.validator, validation.Required),
+	)
+
+	if err != nil {
+		return nil, err
 	}
 
 	return svc, nil

@@ -7,7 +7,11 @@ import (
 )
 
 func (s *service) CreateAccountImpl(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
-	return &pb.CreateAccountResponse{}, nil
+	return &pb.CreateAccountResponse{
+		Account: &pb.Account{
+			Name: req.Name,
+		},
+	}, nil
 }
 
 func (s *service) UpdateAccountImpl(ctx context.Context, req *pb.UpdateAccountRequest) (*pb.UpdateAccountResponse, error) {
