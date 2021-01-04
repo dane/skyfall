@@ -11,8 +11,13 @@ type service struct {
 	validator Validator
 }
 
-func New() (pb.APIServiceServer, error) {
-	return &service{}, nil
+func New(options ...Option) (pb.APIServiceServer, error) {
+	svc := &service{}
+	for _, opt := range options {
+		opt.apply(svc)
+	}
+
+	return svc, nil
 }
 
 func (s *service) CreateAccount(ctx context.Context, req *pb.CreateAccountRequest) (*pb.CreateAccountResponse, error) {
