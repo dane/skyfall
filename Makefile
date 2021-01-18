@@ -1,9 +1,11 @@
-.PHONY: all
-all: generate test
+DOCKER = $(if $(shell which podman), podman, docker)
 
-.PHONY: generate
-generate:
-	docker run -v $(PWD):/opt/protos/src -ti ghcr.io/dane/protos:v0.0.1 generate
+.PHONY: all
+all: protos test
+
+.PHONY: protos
+protos:
+	${DOCKER} run -v $(PWD):/opt/protos/src --privileged -ti ghcr.io/dane/protos:v0.0.1 generate
 
 .PHONY: test
 test:
